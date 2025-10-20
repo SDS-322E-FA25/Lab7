@@ -1,0 +1,99 @@
+---
+title: "Tidy Text"
+output: html_document
+date: "2025-10-15"
+---
+
+# Exercise 1
+Load the `tidyverse` package. Install and load the `tidytext` and `topicmodels` packages.
+```{r}
+# Load packages here
+library(tidyverse)
+library(tidytext)
+library(topicmodels)
+
+```
+
+Run this code, so that `jss` is in your global environment.
+```{r}
+data("JSS_papers")
+jss <- JSS_papers |> 
+  as_tibble() |> 
+  mutate(date = ymd(date),
+         year = year(date),
+         abstract = unlist(description)) |> 
+  select(year, abstract)
+
+View(jss)
+```
+
+
+# Exercise 2
+Tidy `jss` so that there is one token (word) per row.
+```{r}
+jss_tokens <- jss %>%
+  # Your code goes here
+  unnest_tokens(word, abstract) 
+
+```
+
+# Exercise 3
+Remove all stop words from `jss_tokens`, that are included in the SMART lexicon.
+```{r}
+jss_tokens_keywords <- jss_tokens %>%
+  # Your code goes here
+  anti_join(filter(stop_words, lexicon == "SMART"))
+  
+```
+
+# Exercise 4
+What are the five most common words in the most recent year of data?
+```{r}
+# five most common, most recent year
+jss_tokens_keywords |> 
+  # your code goes here
+  filter(year == max(year)) |> 
+  count(word, sort = TRUE) |> 
+  slice(1:5)
+  
+```
+
+What are the five most common words in the earliest year of data?
+```{r}
+# five most common, earliest year
+jss_tokens_keywords |> 
+  # your code goes here
+  filter(year == min(year)) |> 
+  count(word, sort = TRUE) |> 
+  slice(1:5)
+
+```
+
+# Exercise 5
+Run the code below to see how many times "r" (as in the "R" programming language) appears in `jss_tokens_keywords`.
+
+Do you think that frequency value represents the true number of times "R" is mentioned in JSS abstracts between 1996-2010? If not, what might be causing the discrepancy? **The letter `r` is in the SMART lexicon.**
+
+```{r}
+# Get R frequency
+jss_tokens_keywords |> 
+  filter(word == "r") |> 
+  nrow()
+
+```
+
+# Exercise 6
+Using `jss_tokens`, make a line plot with `year` on the x-axis and the yearly frequency for the token `r` on the y-axis. (Hint: use `filter()` and then `count()`.)
+
+What do you notice looking at the plot?
+
+```{r}
+jss_tokens |> 
+  # Your code goes here
+  filter(word == "r") |> 
+  count(year) |> 
+  ggplot(aes(x = year, y = n)) +
+  geom_line()
+
+```
+
